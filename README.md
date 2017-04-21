@@ -46,6 +46,7 @@ startIndex: 0
 draggable: true
 threshold: 20
 loop: false
+stopOnMouseLeave: true
 ```
 
 Example of passing custom options:
