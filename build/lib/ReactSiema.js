@@ -207,14 +207,28 @@ var ReactSiema = function (_Component) {
             this.sliderFrame.style[_transformProperty2.default] = 'translate3d(-' + this.currentSlide * (this.selectorWidth / this.perPage) + 'px, 0, 0)';
         }
     }, {
+        key: 'processMovement',
+        value: function processMovement(movement, toTheRight, sliderWidth) {
+            if (movement < this.config.threshold) {
+                return;
+            }
+
+            if (toTheRight) {
+                this.next();
+            } else {
+                this.prev();
+            }
+            // call again untill we are below the threshold
+            return this.processMovement(movement - sliderWidth, toTheRight, sliderWidth);
+        }
+    }, {
         key: 'updateAfterDrag',
         value: function updateAfterDrag() {
             var movement = this.drag.end - this.drag.start;
-            if (movement > 0 && Math.abs(movement) > this.config.threshold) {
-                this.prev();
-            } else if (movement < 0 && Math.abs(movement) > this.config.threshold) {
-                this.next();
-            }
+            var sliderWidth = this.sliderFrame.firstElementChild.offsetWidth;
+
+            this.processMovement(Math.abs(movement), movement < 0, sliderWidth);
+
             this.slideToCurrent();
         }
     }, {
@@ -231,8 +245,8 @@ var ReactSiema = function (_Component) {
         key: 'clearDrag',
         value: function clearDrag() {
             this.drag = {
-                start: -1,
-                end: -1
+                start: null,
+                end: null
             };
         }
     }, {
@@ -347,9 +361,9 @@ var ReactSiema = function (_Component) {
                 });
             }
 
-            // If drag.end has a value > -1, the slider has been dragged, update
+            // If drag.end has a value, the slider has been dragged, update
             // state accordingly
-            if (this.drag.end > -1) {
+            if (this.drag.end !== null) {
                 this.updateAfterDrag();
                 this.setState({ dragged: true });
             }
