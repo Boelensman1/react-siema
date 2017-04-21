@@ -12,6 +12,7 @@ class ReactSiema extends Component {
         draggable: PropTypes.bool,
         threshold: PropTypes.number,
         loop: PropTypes.bool,
+        stopOnMouseLeave: PropTypes.bool,
         children: PropTypes.oneOfType([
             PropTypes.element,
             PropTypes.arrayOf(PropTypes.element)
@@ -21,8 +22,12 @@ class ReactSiema extends Component {
         onAfterChange: PropTypes.func,
     };
 
+    static defaultProps = {
+        stopOnMouseLeave: true,
+    }
+
     events = [
-        'onTouchStart', 'onTouchEnd', 'onTouchMove', 'onMouseDown', 'onMouseUp', 'onMouseLeave', 'onMouseMove', 'onClick'
+        'onTouchStart', 'onTouchEnd', 'onTouchMove', 'onMouseDown', 'onClick'
     ];
 
     state = {
@@ -41,6 +46,15 @@ class ReactSiema extends Component {
             threshold: 20,
             loop: false,
         }, props);
+
+        if (props.stopOnMouseLeave) {
+            this.events.push('onMouseLeave')
+            this.events.push('onMouseMove')
+            this.events.push('onMouseUp')
+        } else if ( typeof document !== 'undefined' ) {
+            document.addEventListener('mousemove', this.onMouseMove.bind(this))
+            document.addEventListener('mouseup', this.onMouseUp.bind(this))
+        }
 
         this.events.forEach((handler) => {
             this[handler] = this[handler].bind(this);
@@ -192,8 +206,8 @@ class ReactSiema extends Component {
 
     clearDrag() {
         this.drag = {
-            start: 0,
-            end: 0,
+            start: -1,
+            end: -1,
         };
     }
 
@@ -201,6 +215,10 @@ class ReactSiema extends Component {
         Object.keys(styles).forEach((attribute) => {
             target.style[attribute] = styles[attribute];
         });
+    }
+
+    getStyle(target, attribute) {
+        return target.style[attribute]
     }
 
     onTouchStart(e) {
@@ -271,6 +289,13 @@ class ReactSiema extends Component {
         this.pointerDown = true;
         this.drag.start = e.pageX;
 
+        if (!this.props.stopOnMouseLeave) {
+            this.prevCursor = this.getStyle(document.body, 'cursor')
+            this.setStyle(document.body, {
+                cursor: '-webkit-grab',
+            })
+        }
+
         // At this point it's only a click
         this.setState({ dragged: false });
     }
@@ -284,9 +309,15 @@ class ReactSiema extends Component {
             transition: `all ${this.config.duration}ms ${this.config.easing}`
         });
 
-        // If drag.end has a value > 0, the slider has been dragged, update
+        if (!this.props.stopOnMouseLeave) {
+            this.setStyle(document.body, {
+                cursor: this.prevCursor,
+            })
+        }
+
+        // If drag.end has a value > -1, the slider has been dragged, update
         // state accordingly
-        if (this.drag.end) {
+        if (this.drag.end > -1) {
             this.updateAfterDrag();
             this.setState({ dragged: true });
         }
@@ -295,7 +326,6 @@ class ReactSiema extends Component {
     }
 
     onMouseMove(e) {
-        e.preventDefault();
         if (this.pointerDown) {
             this.drag.end = e.pageX;
             this.setStyle(this.sliderFrame, {
