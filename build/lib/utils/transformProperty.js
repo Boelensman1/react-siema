@@ -5,9 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function () {
-    var transform = document.documentElement.style.transform;
-
-    if (typeof transform === 'string') {
+    if (typeof document === 'undefined' || // for serverside rendering
+    typeof document.documentElement.style === 'string') {
         return 'transform';
     }
     return 'WebkitTransform';
