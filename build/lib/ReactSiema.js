@@ -38,7 +38,7 @@ var ReactSiema = function (_Component) {
 
         var _this = _possibleConstructorReturn(this, (ReactSiema.__proto__ || Object.getPrototypeOf(ReactSiema)).call(this));
 
-        _this.events = ['onTouchStart', 'onTouchEnd', 'onTouchMove', 'onMouseDown', 'onMouseUp', 'onMouseLeave', 'onMouseMove', 'onClick'];
+        _this.events = ['onTouchStart', 'onTouchEnd', 'onTouchMove', 'onMouseDown', 'onClick'];
         _this.state = {
             dragged: false
         };
@@ -53,6 +53,15 @@ var ReactSiema = function (_Component) {
             threshold: 20,
             loop: false
         }, props);
+
+        if (props.stopOnMouseLeave) {
+            _this.events.push('onMouseLeave');
+            _this.events.push('onMouseMove');
+            _this.events.push('onMouseUp');
+        } else if (typeof document !== 'undefined') {
+            document.addEventListener('mousemove', _this.onMouseMove.bind(_this));
+            document.addEventListener('mouseup', _this.onMouseUp.bind(_this));
+        }
 
         _this.events.forEach(function (handler) {
             _this[handler] = _this[handler].bind(_this);
@@ -222,8 +231,8 @@ var ReactSiema = function (_Component) {
         key: 'clearDrag',
         value: function clearDrag() {
             this.drag = {
-                start: 0,
-                end: 0
+                start: -1,
+                end: -1
             };
         }
     }, {
@@ -232,6 +241,11 @@ var ReactSiema = function (_Component) {
             Object.keys(styles).forEach(function (attribute) {
                 target.style[attribute] = styles[attribute];
             });
+        }
+    }, {
+        key: 'getStyle',
+        value: function getStyle(target, attribute) {
+            return target.style[attribute];
         }
     }, {
         key: 'onTouchStart',
@@ -306,6 +320,13 @@ var ReactSiema = function (_Component) {
             this.pointerDown = true;
             this.drag.start = e.pageX;
 
+            if (!this.props.stopOnMouseLeave) {
+                this.prevCursor = this.getStyle(document.body, 'cursor');
+                this.setStyle(document.body, {
+                    cursor: '-webkit-grab'
+                });
+            }
+
             // At this point it's only a click
             this.setState({ dragged: false });
         }
@@ -320,9 +341,15 @@ var ReactSiema = function (_Component) {
                 transition: 'all ' + this.config.duration + 'ms ' + this.config.easing
             });
 
-            // If drag.end has a value > 0, the slider has been dragged, update
+            if (!this.props.stopOnMouseLeave) {
+                this.setStyle(document.body, {
+                    cursor: this.prevCursor
+                });
+            }
+
+            // If drag.end has a value > -1, the slider has been dragged, update
             // state accordingly
-            if (this.drag.end) {
+            if (this.drag.end > -1) {
                 this.updateAfterDrag();
                 this.setState({ dragged: true });
             }
@@ -332,7 +359,6 @@ var ReactSiema = function (_Component) {
     }, {
         key: 'onMouseMove',
         value: function onMouseMove(e) {
-            e.preventDefault();
             if (this.pointerDown) {
                 this.drag.end = e.pageX;
                 this.setStyle(this.sliderFrame, _defineProperty({
@@ -401,9 +427,13 @@ ReactSiema.propTypes = {
     draggable: _react.PropTypes.bool,
     threshold: _react.PropTypes.number,
     loop: _react.PropTypes.bool,
+    stopOnMouseLeave: _react.PropTypes.bool,
     children: _react.PropTypes.oneOfType([_react.PropTypes.element, _react.PropTypes.arrayOf(_react.PropTypes.element)]),
 
     // Fire events after change
     onAfterChange: _react.PropTypes.func
+};
+ReactSiema.defaultProps = {
+    stopOnMouseLeave: true
 };
 exports.default = ReactSiema;
