@@ -185,7 +185,7 @@ class ReactSiema extends Component {
         this.sliderFrame.style[transformProperty] = `translate3d(-${this.currentSlide * (this.selectorWidth / this.perPage)}px, 0, 0)`;
     }
 
-    processMovement(movement, toTheRight, sliderWidth) {
+    processMovement(movement, toTheRight) {
         if (movement < this.config.threshold) {
             return
         }
@@ -196,14 +196,13 @@ class ReactSiema extends Component {
             this.prev();
         }
         // call again untill we are below the threshold
-        return this.processMovement(movement - sliderWidth, toTheRight, sliderWidth)
+        return this.processMovement(movement - this.selectorWidth, toTheRight)
     }
 
     updateAfterDrag() {
         const movement = this.drag.end - this.drag.start;
-        const sliderWidth = this.sliderFrame.firstElementChild.offsetWidth
 
-        this.processMovement(Math.abs(movement), movement < 0, sliderWidth)
+        this.processMovement(Math.abs(movement), movement < 0)
 
         this.slideToCurrent();
     }
