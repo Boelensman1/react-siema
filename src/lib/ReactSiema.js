@@ -206,8 +206,8 @@ class ReactSiema extends Component {
 
     clearDrag() {
         this.drag = {
-            start: -1,
-            end: -1,
+            start: null,
+            end: null,
         };
     }
 
@@ -315,9 +315,9 @@ class ReactSiema extends Component {
             })
         }
 
-        // If drag.end has a value > -1, the slider has been dragged, update
+        // If drag.end has a value, the slider has been dragged, update
         // state accordingly
-        if (this.drag.end > -1) {
+        if (this.drag.end !== null) {
             this.updateAfterDrag();
             this.setState({ dragged: true });
         }
