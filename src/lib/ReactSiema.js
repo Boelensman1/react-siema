@@ -195,12 +195,15 @@ class ReactSiema extends Component {
     onTouchStart(e) {
         e.stopPropagation();
         this.pointerDown = true;
+        this.firstMove = true;
         this.drag.start = e.touches[0].pageX;
+        this.drag.startY = e.touches[0].pageY;
     }
 
     onTouchEnd(e) {
         e.stopPropagation();
         this.pointerDown = false;
+        this.firstMove = true;
         this.setStyle(this.sliderFrame, {
             webkitTransition: `all ${this.config.duration}ms ${this.config.easing}`,
             transition: `all ${this.config.duration}ms ${this.config.easing}`
@@ -212,8 +215,29 @@ class ReactSiema extends Component {
     }
 
     onTouchMove(e) {
-        e.stopPropagation();
-        if (this.pointerDown) {
+        // ensure swiping with one touch and not pinching
+        if ( e.touches.length > 1 || (e.scale && e.scale !== 1)) return;
+
+        if ( this.firstMove ) {
+            this.firstMove = false;
+
+            const touches = e.touches[0];
+
+            // measure change in x and y
+            const delta = {
+                x: touches.pageX - this.drag.start,
+                y: touches.pageY - this.drag.startY
+            };
+
+            if (Math.abs(delta.x) < Math.abs(delta.y)) {
+                this.verticalScrolling = true
+                return;
+            }
+            this.verticalScrolling = false
+        }
+
+        if (this.pointerDown && !this.verticalScrolling) {
+            e.preventDefault();
             this.drag.end = e.touches[0].pageX;
 
             this.setStyle(this.sliderFrame, {
