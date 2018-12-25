@@ -12,6 +12,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _debounce = require('./utils/debounce');
 
 var _debounce2 = _interopRequireDefault(_debounce);
@@ -208,7 +212,7 @@ var ReactSiema = function (_Component) {
         }
     }, {
         key: 'processMovement',
-        value: function processMovement(movement, toTheRight, sliderWidth) {
+        value: function processMovement(movement, toTheRight) {
             if (movement < this.config.threshold) {
                 return;
             }
@@ -219,15 +223,14 @@ var ReactSiema = function (_Component) {
                 this.prev();
             }
             // call again untill we are below the threshold
-            return this.processMovement(movement - sliderWidth, toTheRight, sliderWidth);
+            return this.processMovement(movement - this.selectorWidth, toTheRight);
         }
     }, {
         key: 'updateAfterDrag',
         value: function updateAfterDrag() {
             var movement = this.drag.end - this.drag.start;
-            var sliderWidth = this.sliderFrame.firstElementChild.offsetWidth;
 
-            this.processMovement(Math.abs(movement), movement < 0, sliderWidth);
+            this.processMovement(Math.abs(movement), movement < 0);
 
             this.slideToCurrent();
         }
@@ -433,19 +436,19 @@ var ReactSiema = function (_Component) {
 }(_react.Component);
 
 ReactSiema.propTypes = {
-    resizeDebounce: _react.PropTypes.number,
-    duration: _react.PropTypes.number,
-    easing: _react.PropTypes.string,
-    perPage: _react.PropTypes.number,
-    startIndex: _react.PropTypes.number,
-    draggable: _react.PropTypes.bool,
-    threshold: _react.PropTypes.number,
-    loop: _react.PropTypes.bool,
-    stopOnMouseLeave: _react.PropTypes.bool,
-    children: _react.PropTypes.oneOfType([_react.PropTypes.element, _react.PropTypes.arrayOf(_react.PropTypes.element)]),
+    resizeDebounce: _propTypes2.default.number,
+    duration: _propTypes2.default.number,
+    easing: _propTypes2.default.string,
+    perPage: _propTypes2.default.number,
+    startIndex: _propTypes2.default.number,
+    draggable: _propTypes2.default.bool,
+    threshold: _propTypes2.default.number,
+    loop: _propTypes2.default.bool,
+    stopOnMouseLeave: _propTypes2.default.bool,
+    children: _propTypes2.default.oneOfType([_propTypes2.default.element, _propTypes2.default.arrayOf(_propTypes2.default.element)]),
 
     // Fire events after change
-    onAfterChange: _react.PropTypes.func
+    onAfterChange: _propTypes2.default.func
 };
 ReactSiema.defaultProps = {
     stopOnMouseLeave: true
