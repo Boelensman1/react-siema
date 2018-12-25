@@ -225,6 +225,7 @@ class ReactSiema extends Component {
     }
 
     setStyle(target, styles) {
+        if (!target || !target.style) { return; }
         Object.keys(styles).forEach((attribute) => {
             target.style[attribute] = styles[attribute];
         });

@@ -255,6 +255,9 @@ var ReactSiema = function (_Component) {
     }, {
         key: 'setStyle',
         value: function setStyle(target, styles) {
+            if (!target || !target.style) {
+                return;
+            }
             Object.keys(styles).forEach(function (attribute) {
                 target.style[attribute] = styles[attribute];
             });
